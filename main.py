@@ -2,13 +2,15 @@
 import sys
 import spiff
 import os
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt4 import QtCore, QtGui, QtWebKit, QtNetwork
 import tempfile
 import cups
 from mako.template import Template
 import subprocess 
 
-api = spiff.API("https://synhak.org/auth/", verify=False)
+class AnonymousJar(QtNetwork.QNetworkCookieJar):
+    def clear(self):
+        self.setAllCookies([])
 
 class Page(QtGui.QWidget):
     def __init__(self, name, parent=None):
@@ -99,8 +101,11 @@ class WebPage(Page):
         self.layout.addWidget(self.view)
 
         self.view.page().networkAccessManager().sslErrors.connect(self.sslErrors)
+        self.cookies = AnonymousJar()
+        self.view.page().networkAccessManager().setCookieJar(self.cookies)
         self.view.loadProgress.connect(self.loadProgress)
         self.view.urlChanged.connect(self.urlChange)
+        self.view.settings().setAttribute(QtWebKit.QWebSettings.PrivateBrowsingEnabled, True)
 
 
     def loadProgress(self, progress):
@@ -119,6 +124,7 @@ class WebPage(Page):
         return self.__url
 
     def reset(self):
+        self.cookies.clear()
         self.view.load(QtCore.QUrl(self.__url))
 
 class EventFilter(QtGui.QApplication):
@@ -128,6 +134,8 @@ class EventFilter(QtGui.QApplication):
         return super(EventFilter, self).notify(object, event)
 
 app = EventFilter(sys.argv)
+
+api = spiff.API("https://synhak.org/auth/", verify=False)
 
 pages = (
     NamebadgePage(),
