@@ -1,0 +1,25 @@
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{rotating}
+\usepackage{multicol}
+\pagestyle{empty}
+\setlength\parindent{0pt}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{graphicx}
+\usepackage[landscape,left=0.1in,right=0.1in,top=0.16in,bottom=0.16in,noheadfoot,nomarginpar,paperwidth=3.5in,paperheight=1.1in]{geometry}
+\doublespacing
+
+\begin{document}
+\centering
+\begin{rotate}{270}
+    \begin{minipage}{3.0in}
+        \begin{center}
+            \begin{tabular}{c|c}
+                Hi, my name is & This is what I do: \tabularnewline
+
+                {\LARGE ${name}} & {\LARGE ${purpose}}
+            \end{tabular}
+        \end{center}
+    \end{minipage}
+\end{rotate}
+\end{document}
