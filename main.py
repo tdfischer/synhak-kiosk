@@ -37,7 +37,7 @@ class NamebadgePage(Page):
         self.formLayout.addRow("What do you do?", self.doField)
         self.badgeCounter = QtGui.QLabel(self.form)
         self.formLayout.addRow("Badges Printed:", self.badgeCounter)
-        self.printButton = QtGui.QPushButton(self)
+        self.printButton = QtGui.QPushButton("Print it!", self)
         self.printButton.clicked.connect(self.printBadge)
         self.layout.addWidget(self.form)
         self.layout.addWidget(self.printButton)
