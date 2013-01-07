@@ -7,6 +7,8 @@ import tempfile
 import cups
 from mako.template import Template
 import subprocess 
+import spaceapi
+import optparse
 
 class AnonymousJar(QtNetwork.QNetworkCookieJar):
     def clear(self):
@@ -61,7 +63,7 @@ class NamebadgePage(Page):
         print "Wrote out.pdf to", tempDir
         conn = cups.Connection()
         conn.printFile('QL-7000', "%s/out.pdf"%(tempDir), "Label for %s"%(name), {'PageSize':'29x90','BrMirror':'OFF', 'orientation-requested': '5'})
-        subprocess.call(["flite", "-t", "Hello, %s. Welcome to syn hack!"%(name)])
+        subprocess.call(["flite", "-t", "Hello, %s. Welcome to %s!"%(name, spaceAPI.name)])
         self.reset()
 
     def updateCount(self, value=None):
@@ -134,15 +136,38 @@ class EventFilter(QtGui.QApplication):
             resetTimeout()
         return super(EventFilter, self).notify(object, event)
 
+parser = optparse.OptionParser()
+parser.add_option('-a', '--spaceapi', help="URL to spaceapi, if one cannot be automatically discovered", default=None)
+
+(options, args) = parser.parse_args()
+
 app = EventFilter(sys.argv)
 
-api = spiff.API("https://synhak.org/auth/", verify=False)
+if options.spaceapi:
+    spaceAPI = spaceapi.API(options.spaceapi)
+else:
+    spaceAPI = spaceapi.Browser().defaultAPI()
+api = None
 
-pages = (
+print "Found SpaceAPI:", spaceAPI
+
+pages = [
     NamebadgePage(),
-    WebPage('Wiki', 'http://synhak.org/'),
-    WebPage('Spiff', 'https://synhak.org/auth/'),
-)
+]
+
+if spaceAPI:
+    pages.append(WebPage(spaceAPI.name, spaceAPI._data['url']))
+    if 'x-spiff-url' in spaceAPI._data:
+        print "Found a spiff installation at", spaceAPI._data['x-spiff-url']
+        api = spiff.API(spaceAPI._data['x-spiff-url'], verify=False)
+        pages.append(WebPage('Spiff', spaceAPI._data['x-spiff-url']))
+    if 'contact' in spaceAPI._data:
+        if 'twitter' in spaceAPI._data['contact']:
+            pages.append(WebPage('Twitter', 'http://twitter.com/%s'%(spaceAPI._data['contact']['twitter'])))
+        
+    if 'cam' in spaceAPI._data:
+        for webcam in spaceAPI._data['cam']:
+            pages.append(WebPage('Webcam', webcam))
 
 def resetTimeout():
     timeout.stop()
