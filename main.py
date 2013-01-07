@@ -60,7 +60,8 @@ class NamebadgePage(Page):
 
         print "Wrote out.pdf to", tempDir
         conn = cups.Connection()
-        conn.printFile('QL-700', "%s/out.pdf"%(tempDir), "Label for %s"%(name), {'BrCutLabel':'0', 'PageSize':'29x90','BrMirror':'OFF', 'orientation-requested': '5'})
+        conn.printFile('QL-7000', "%s/out.pdf"%(tempDir), "Label for %s"%(name), {'PageSize':'29x90','BrMirror':'OFF', 'orientation-requested': '5'})
+        subprocess.call(["flite", "-t", "Hello, %s. Welcome to syn hack!"%(name)])
         self.reset()
 
     def updateCount(self, value=None):
