@@ -26,6 +26,37 @@ class Page(QtGui.QWidget):
     def reset(self):
         pass
 
+class OpenClosePage(Page):
+    def __init__(self, sensor, parent=None):
+        super(OpenClosePage, self).__init__('Open/Close Space', parent)
+        self.__sensor = sensor
+        self.setStyleSheet("*{font-size:32pt}")
+        self.layout = QtGui.QVBoxLayout(self)
+        self.button = QtGui.QPushButton(self)
+        self.text = QtGui.QLabel(self)
+        self.text.setAlignment(QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.text)
+        self.layout.addWidget(self.button)
+        self.button.clicked.connect(self.toggle)
+        self.updateButton()
+
+    def toggle(self):
+        if self.__sensor.value == True:
+            self.__sensor.setValue(False)
+        else:
+            self.__sensor.setValue(True)
+        self.updateButton()
+
+    def updateButton(self):
+        if self.__sensor.value == True:
+            self.button.setStyleSheet("*{background-color: #f00;}")
+            self.button.setText("Close Space")
+            self.text.setText("Space is OPEN")
+        else:
+            self.button.setStyleSheet("*{background-color: #0f0;}")
+            self.button.setText("Open Space")
+            self.text.setText("Space is CLOSED")
+
 class NamebadgePage(Page):
     def __init__(self, parent=None):
         super(NamebadgePage, self).__init__('Namebadge', parent)
@@ -146,10 +177,16 @@ app = EventFilter(sys.argv)
 if options.spaceapi:
     spaceAPI = spaceapi.API(options.spaceapi)
 else:
-    spaceAPI = spaceapi.Browser().defaultAPI()
+    try:
+        spaceAPI = spaceapi.Browser().defaultAPI()
+    except spaceapi.DiscoveryError:
+        spaceAPI = None
 api = None
 
-print "Found SpaceAPI:", spaceAPI
+if spaceAPI:
+    print "Found SpaceAPI:", spaceAPI.apiurl
+else:
+    print "No SpaceAPI found."
 
 pages = [
     NamebadgePage(),
@@ -161,6 +198,8 @@ if spaceAPI:
         print "Found a spiff installation at", spaceAPI._data['x-spiff-url']
         api = spiff.API(spaceAPI._data['x-spiff-url'], verify=False)
         pages.append(WebPage('Spiff', spaceAPI._data['x-spiff-url']))
+        if 'x-spiff-open-sensor' in spaceAPI._data:
+          pages.append(OpenClosePage(api.sensor(spaceAPI._data['x-spiff-open-sensor'])))
     if 'contact' in spaceAPI._data:
         if 'twitter' in spaceAPI._data['contact']:
             pages.append(WebPage('Twitter', 'http://twitter.com/%s'%(spaceAPI._data['contact']['twitter'])))
