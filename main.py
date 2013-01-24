@@ -220,6 +220,7 @@ widget = QtGui.QWidget()
 layout = QtGui.QVBoxLayout(widget)
 
 tabs = QtGui.QTabWidget(widget)
+tabs.setStyleSheet("*{font-size:16pt}")
 timeout = QtCore.QTimeLine(1000*10)
 timeout.valueChanged.connect(updateTimeout)
 timeout.finished.connect(timeout.start)
