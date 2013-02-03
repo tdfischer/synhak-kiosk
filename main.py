@@ -175,7 +175,7 @@ parser.add_option('-a', '--spaceapi', help="URL to spaceapi, if one cannot be au
 app = EventFilter(sys.argv)
 
 if options.spaceapi:
-    spaceAPI = spaceapi.API(options.spaceapi)
+    spaceAPI = spaceapi.API(options.spaceapi, verify=False)
 else:
     try:
         spaceAPI = spaceapi.Browser().defaultAPI()
