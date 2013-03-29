@@ -1,5 +1,23 @@
 from PyQt4 import QtGui, QtCore
 
+class Page(QtGui.QWidget):
+    activity = QtCore.pyqtSignal()
+
+    def __init__(self, name, kioskUI):
+        super(Page, self).__init__(kioskUI)
+        self.__name = name
+
+    def resetTimeout(self):
+        self.activity.emit()
+
+    @property
+    def name(self):
+        return self.__name
+
+    def reset(self):
+        pass
+
+
 class KioskUI(QtGui.QWidget):
     def __init__(self, parent=None):
         super(KioskUI, self).__init__(parent)
